@@ -1,0 +1,20 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(16, 20px); /* Creates 16 columns */
+    grid-gap: 3px; /* This sets both row and column gaps to 10px */
+  }
+
+.tile {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background-color: bisque;
+}
+
+.snakeBody {
+    background-color: darkgoldenrod;
+}
+
+.appleTile {
+    background-color: brown;
+}
