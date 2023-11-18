@@ -7,6 +7,8 @@ continue right and left, maybe itll spin aswell
 */
 const TILES_HORIZONTAL = 16;
 const TILES_VERTICAL = 16;
+const TILE_SIZE = 20;
+const GRID_SIZE = (20*16) + ((TILES_HORIZONTAL-1)*3); //365
 
 const GROWTH_PER_APPLE = 3;
 const START_SPEED = 150; //ms per frame, so lower value is higher speed
@@ -26,6 +28,19 @@ class Grid {
     constructor(){
         this.height = 1;
         this.width = 1;
+        this.posX = 0;
+        this.posY = 0;
+
+        this.window_height = window.innerHeight;
+        this.window_width = window.innerWidth;
+        this.maxColumns = Math.ceil(this.window_width/GRID_SIZE);
+        this.maxRows = Math.ceil(this.window_height/GRID_SIZE);
+        console.log("maxRows: "+this.maxRows +"maxColumns: "+this.maxColumns)
+
+        this.moveState = 0;
+        this.moveUp = false;
+        this.moveLeft = false;
+        this.moveInterval = null;
 
         this.body = document.body;
         this.metaGrid = document.createElement("div");
@@ -50,12 +65,65 @@ class Grid {
     }
     
     grow(){
-        this.metaGrid.appendChild(this.gridDiv.cloneNode(true));
-        if(this.height < 3){
-            this.height += 1;
-        } else {
-            this.metaGrid.style.gridTemplateColumns += " 365px"
-            this.width += 1;
+        const addPlayGrid = (amount) => {
+            for( let i = 0; i < amount; i++)
+                this.metaGrid.appendChild(this.gridDiv.cloneNode(true));
+        }
+        const addWidth = (columns) => {
+            this.width += columns;
+            this.metaGrid.style.gridTemplateColumns = "repeat("+this.width+","+GRID_SIZE+"px)";
+            addPlayGrid(this.height*columns);
+        }
+        if(this.height < this.maxRows){
+            if(this.height == this.maxRows - 1){
+                this.height = this.maxRows+1;
+                addPlayGrid(2);
+            } else {
+                this.height += 1;
+                addPlayGrid(1);
+            }
+        } else if(this.width < this.maxColumns){
+            if(this.width == this.maxColumns - 1){
+                addWidth(2);
+            } else {
+                addWidth(1);
+            }
+        } else if(this.width >= this.maxColumns && this.height >= this.maxRows){
+            this.changeMoveState();
+        }
+        console.log("H: "+this.height+" W: "+this.width);
+    }
+
+    startMove(){
+        this.moveInterval = setInterval(()=>this.move(), 100);
+    }
+    stopMove(){
+        clearInterval(this.moveInterval);
+    }
+    changeMoveState(){
+        this.moveState += 1;
+        if(this.moveInterval === null){
+            this.startMove();
+        }
+        if( this.moveState > 0 ){
+            this.moveUp = true;
+        }
+        if( this.moveState > 1 ){
+            this.moveLeft = true;
+        }
+    }
+    move(){
+        if( this.moveUp ) {
+            this.metaGrid.style.top = ""+this.posX+"px";
+            this.posX -= 2;
+            if(this.posX < -GRID_SIZE)
+                this.posX = 0;
+        }
+        if( this.moveLeft ){
+            this.metaGrid.style.left = ""+this.posY+"px";
+            this.posY -= 2;
+            if(this.posY < -GRID_SIZE)
+                this.posY = 0;
         }
     }
 }

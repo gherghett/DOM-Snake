@@ -1,11 +1,18 @@
 body, html {
     overflow: hidden; /* Hide overflow for the whole page */
+    margin: 0;
+    padding: 0;
 }
 
 #meta_grid {
+    border: 1px;
+    border-color: black;
+    position: absolute;
     display:grid;
-    grid-auto-columns: auto;
+    grid-auto-columns: 365px;
     grid-gap: 3px;
+    top:0;
+    left:0;
 }
 
 .grid {
@@ -28,3 +35,4 @@ body, html {
 .appleTile {
     background-color: brown;
 }
+
