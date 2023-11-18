@@ -14,7 +14,7 @@ function createDivs(){
     for(let i = 0; i < TILES_VERTICAL; i++){
         for(let j = 0; j < TILES_HORIZONTAL; j++){
             let tile = document.createElement("div");
-            tile.id = getTileId(i, j);
+            tile.classList.add(getTileClass(i, j));
             tile.classList.add("tile");
             gridDiv.appendChild(tile);
         }
@@ -22,8 +22,8 @@ function createDivs(){
 }
 
 //x is updown and y leftright
-function getTileId(x, y){
-    return x.toString().padStart(2, '0') + y.toString().padStart(2, '0');
+function getTileClass(x, y){
+    return "tile_" + x.toString().padStart(2, '0') + y.toString().padStart(2, '0');
 }
 
 function randomPos(){
@@ -105,12 +105,12 @@ class Snake {
 
 
     draw(){
-        // console.log("tail"+this.tail)
-        let tailEnd = document.getElementById(getTileId(...this.tail));
-        tailEnd.classList.remove('snakeBody');
         //we need to draw the head and erase the tail
-        let head = document.getElementById(getTileId(...this.snakeBody[0]));
-        head.classList.add('snakeBody');
+        let tailEnd = document.querySelectorAll("."+getTileClass(...this.tail));
+        tailEnd.forEach(tile => tile.classList.remove('snakeBody'));
+        //
+        let head = document.querySelectorAll("."+getTileClass(...this.snakeBody[0]));
+        head.forEach( tile => tile.classList.add('snakeBody'));
     }
 }
 
@@ -129,14 +129,15 @@ class Apple {
         this.y = randomPos();
         let ccc = 1;
         if(snake == null || snake.checkPosFree(this.x, this.y)){
-            this.appleTile = document.getElementById(getTileId(this.x, this.y));
-            this.appleTile.classList.add('appleTile');
+            this.appleTile = document.querySelectorAll("."+getTileClass(this.x, this.y));
+            this.appleTile.forEach( tile => tile.classList.add('appleTile'));
         } else {
             this.regen(snake);
         }
     }
     dispose(){
-        this.appleTile.classList.remove("appleTile");
+        this.appleTile = document.querySelectorAll(".appleTile");
+        this.appleTile.forEach( tile => tile.classList.remove('appleTile'));
         //appleNew = true; //to see if an apple was eaten, to speed up snake (that is speed whole game up)
     }
 }
