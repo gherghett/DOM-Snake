@@ -68,11 +68,13 @@ class Snake {
         if(this.x === apple.x && this.y === apple.y){
             this.bodyLength += 3;
             apple.regen(this);
+            return true;
         }     
         this.snakeBody.slice(1).forEach(element => {
             if(element[0] === this.x && element[1] === this.y)
                 window.location.reload();
         });
+        return false;
     }
 
     checkPosFree(x, y){
@@ -99,6 +101,7 @@ class Apple {
     x;
     y;
     appleTile;
+    //appleNew;
     constructor(){
         this.regen();
     }
@@ -117,26 +120,35 @@ class Apple {
     }
     dispose(){
         this.appleTile.classList.remove("appleTile");
+        //appleNew = true; //to see if an apple was eaten, to speed up snake (that is speed whole game up)
     }
 }
 
-const theSnake = new Snake();
-const theApple = new Apple();
+class GameWorld {
+    constructor(){
+        this.snake = new Snake();
+        this.apple = new Apple();
+        this.gameSpeed = 150;
+        this.intervalId = setInterval(() => this.gameLoop(), this.gameSpeed);
+    }
+    gameLoop(){
+        this.snake.move();
+        this.snake.draw();
+        if( this.snake.collide(this.apple)){
+            this.speedUp();
+        }
+        console.log("gm");
+    }
+    speedUp(){
+        clearInterval(this.intervalId);
+        this.gameSpeed = Math.floor(this.gameSpeed*0.95);
+        this.intervalId = setInterval(() => this.gameLoop(), this.gameSpeed);
+    }
+}
+
+const gameWorld = new GameWorld();
 
 window.addEventListener('keydown', function(event) {
     console.log('Key pressed:', event.key);
-    theSnake.changeDir(event.key);
+    gameWorld.snake.changeDir(event.key);
 });
-window.addEventListener('keyup', function(event) {
-    console.log('Key released:', event.key);
-    // Your logic here
-});
-
-function gameLoop(){
-    theSnake.move();
-    theSnake.draw();
-    theSnake.collide(theApple);
-
-}
-
-let intervalId = setInterval(gameLoop, 150);
