@@ -44,27 +44,43 @@ h1, p {
     background-color: brown;
 }
 
-@keyframes spin-right {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-@keyframes spin-left {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(-360deg);
-    }
+.arrow-keys {
+    display: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 200px;
+    background-color: transparent; /* Transparent background */
+    position: absolute;
+    top: 365px;
+    z-index: 100;
 }
 
-.spinning-right {
-    animation: spin-right 20s linear infinite;
+.arrow {
+    width: 50px;
+    height: 50px;
+    margin: 5px;
+    font-size: 20px;
+    cursor: pointer;
 }
 
-.spinning-left {
-    animation: spin-left 20s linear infinite;
+.up {
+    position: absolute;
+    top: 0;
+}
+
+.down {
+    position: absolute;
+    bottom: 0;
+}
+
+.left {
+    position: absolute;
+    left: 0;
+}
+
+.right {
+    position: absolute;
+    right: 0;
 }

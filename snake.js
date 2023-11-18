@@ -23,6 +23,11 @@ function randomPos(){
     return Math.floor(Math.random()*TILES_HORIZONTAL);
 }
 
+function isMobileDevice() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    return /iPhone|iPad|iPod|Android/i.test(userAgent);
+}
+
 //grid keeps tabs on the repeating grids*, and all animation
 //*a grid is the entire playarea which is duplicated, all grids are contained in the metaGrid
 class Grid {
@@ -92,7 +97,7 @@ class Grid {
         }
         if(this.height < this.maxRows){
             if(this.height == this.maxRows - 1){
-                this.height = this.maxRows+3; //the extra grids are for wrapping
+                this.height = this.maxRows+4; //the extra grids are for wrapping
                 addPlayGrid(4);
             } else {
                 let heightAdd = Math.ceil(this.maxRows/3); //so three times and we are there
@@ -352,3 +357,24 @@ window.addEventListener('keydown', function(event) {
     gameWorld.debug.inputHandle(event.key);
 });
 
+if( isMobileDevice() ) {
+
+    document.getElementById("arrows").style.display = "flex";
+
+    document.getElementById('up').addEventListener('click', function() {
+        gameWorld.snake.moveDir = 'ArrowUp';
+    });
+
+    document.getElementById('down').addEventListener('click', function() {
+        gameWorld.snake.moveDir = 'ArrowDown';
+    });
+
+    document.getElementById('left').addEventListener('click', function() {
+        gameWorld.snake.moveDir = 'ArrowLeft';
+    });
+
+    document.getElementById('right').addEventListener('click', function() {
+        gameWorld.snake.moveDir = 'ArrowRight';
+    });
+
+}
