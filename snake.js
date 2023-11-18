@@ -8,19 +8,26 @@ continue right and left, maybe itll spin aswell
 const TILES_HORIZONTAL = 16;
 const TILES_VERTICAL = 16;
 
+const GROWTH_PER_APPLE = 3;
+const START_SPEED = 150; //ms per frame, so lower value is higher speed
+const SPEED_ACC = 0.95;
+
 //x is updown and y leftright
 function getTileClass(x, y){
     return "tile_" + x.toString().padStart(2, '0') + y.toString().padStart(2, '0');
 }
 
 function randomPos(){
-    return Math.floor(Math.random()*16);//the number of tiles is hardcoded
+    return Math.floor(Math.random()*TILES_HORIZONTAL);
 }
 
 class Grid {
 
     constructor(){
         this.body = document.body;
+        this.metaGrid = document.createElement("div");
+        this.metaGrid.id = "meta_grid";
+        this.body.appendChild(this.metaGrid);
         this.gridDiv = document.createElement("div");
         this.createDivs();
     }
@@ -28,7 +35,7 @@ class Grid {
     createDivs(){
         this.gridDiv.id = "grid_original";
         this.gridDiv.classList.add("grid");
-        this.body.appendChild(this.gridDiv);
+        this.metaGrid.appendChild(this.gridDiv);
         for(let i = 0; i < TILES_VERTICAL; i++){
             for(let j = 0; j < TILES_HORIZONTAL; j++){
                 let tile = document.createElement("div");
@@ -37,7 +44,8 @@ class Grid {
                 this.gridDiv.appendChild(tile);
             }
         }
-        this.body.appendChild(this.gridDiv.cloneNode(true));
+        this.metaGrid.appendChild(this.gridDiv.cloneNode(true));
+        this.metaGrid.appendChild(this.gridDiv.cloneNode(true));
     }
 }
 
@@ -94,7 +102,8 @@ class Snake {
 
     collide(apple) {
         if(this.x === apple.x && this.y === apple.y){
-            this.bodyLength += 3;
+            this.bodyLength += GROWTH_PER_APPLE;
+            this.appleEaten += 1;
             apple.regen(this);
             return true;
         }     
@@ -155,9 +164,10 @@ class Apple {
 
 class GameWorld {
     constructor(){
+        this.grid = new Grid();
         this.snake = new Snake();
         this.apple = new Apple();
-        this.gameSpeed = 150;
+        this.gameSpeed = START_SPEED;
         this.intervalId = setInterval(() => this.gameLoop(), this.gameSpeed);
     }
     gameLoop(){
@@ -170,12 +180,10 @@ class GameWorld {
     }
     speedUp(){
         clearInterval(this.intervalId);
-        this.gameSpeed = Math.floor(this.gameSpeed*0.95);
+        this.gameSpeed = Math.floor(this.gameSpeed*SPEED_ACC);
         this.intervalId = setInterval(() => this.gameLoop(), this.gameSpeed);
     }
 }
-
-const grid = new Grid();
 
 const gameWorld = new GameWorld();
 

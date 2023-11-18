@@ -1,3 +1,13 @@
+body, html {
+    overflow: hidden; /* Hide overflow for the whole page */
+}
+
+#meta_grid {
+    display:grid;
+    grid-auto-columns: auto;
+    grid-gap: 3px;
+}
+
 .grid {
     display: grid;
     grid-template-columns: repeat(16, 20px); /* Creates 16 columns */
