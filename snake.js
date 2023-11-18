@@ -24,6 +24,9 @@ function randomPos(){
 class Grid {
 
     constructor(){
+        this.height = 1;
+        this.width = 1;
+
         this.body = document.body;
         this.metaGrid = document.createElement("div");
         this.metaGrid.id = "meta_grid";
@@ -44,8 +47,16 @@ class Grid {
                 this.gridDiv.appendChild(tile);
             }
         }
+    }
+    
+    grow(){
         this.metaGrid.appendChild(this.gridDiv.cloneNode(true));
-        this.metaGrid.appendChild(this.gridDiv.cloneNode(true));
+        if(this.height < 3){
+            this.height += 1;
+        } else {
+            this.metaGrid.style.gridTemplateColumns += " 365px"
+            this.width += 1;
+        }
     }
 }
 
@@ -169,14 +180,16 @@ class GameWorld {
         this.apple = new Apple();
         this.gameSpeed = START_SPEED;
         this.intervalId = setInterval(() => this.gameLoop(), this.gameSpeed);
+        this.debug = new Debug();
     }
     gameLoop(){
         this.snake.move();
         this.snake.draw();
         if( this.snake.collide(this.apple)){
             this.speedUp();
+            this.grid.grow();
         }
-        console.log("gm");
+        // console.log("gm");
     }
     speedUp(){
         clearInterval(this.intervalId);
@@ -185,9 +198,20 @@ class GameWorld {
     }
 }
 
+class Debug {
+    inputHandle(keypressed){
+        if(keypressed == "a"){
+            gameWorld.grid.grow();
+        }
+    }
+}
+
 const gameWorld = new GameWorld();
 
 window.addEventListener('keydown', function(event) {
     console.log('Key pressed:', event.key);
-    gameWorld.snake.changeDir(event.key);
+    if(event.key.startsWith("Arrow"))
+        gameWorld.snake.changeDir(event.key);
+    gameWorld.debug.inputHandle(event.key);
 });
+
