@@ -11,8 +11,8 @@ const TILE_SIZE = 20;
 const GRID_SIZE = (20*16) + ((TILES_HORIZONTAL-1)*3); //365
 
 const GROWTH_PER_APPLE = 3;
-const START_SPEED = 150; //ms per frame, so lower value is higher speed
-const SPEED_ACC = 0.95;
+const START_SPEED = 200; //ms per frame, so lower value is higher speed
+const SPEED_ACC = 0.93;
 
 //x is updown and y leftright
 function getTileClass(x, y){
@@ -86,14 +86,16 @@ class Grid {
                 this.height = this.maxRows+3;
                 addPlayGrid(4);
             } else {
-                this.height += 1;
-                addPlayGrid(1);
+                let heightAdd = Math.ceil(this.maxRows/3); //so three times an we are there
+                this.height += heightAdd;
+                addPlayGrid(heightAdd);
             }
         } else if(this.width < this.maxColumns){
             if(this.width == this.maxColumns - 1){
                 addWidth(4);
             } else {
-                addWidth(1);
+                let widthAdd = Math.ceil(this.maxColumns/3);
+                addWidth(widthAdd);
             }
         } else if(this.width >= this.maxColumns && this.height >= this.maxRows){
             this.changeMoveState();
@@ -310,8 +312,9 @@ class GameWorld {
         this.snake.draw();
         if( this.snake.collide(this.apple)){
             this.speedUp();
-            this.grid.grow();
             this.points += 1;
+            if(this.points >= 3)
+                this.grid.grow();
             this.pointElement.innerHTML = ""+this.points;
             
         }
