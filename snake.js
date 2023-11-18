@@ -303,6 +303,7 @@ class GameWorld {
         this.gameSpeed = START_SPEED;
         this.intervalId = setInterval(() => this.gameLoop(), this.gameSpeed);
         this.debug = new Debug();
+        this.pointElement = document.getElementById("points");
     }
     gameLoop(){
         this.snake.move();
@@ -311,6 +312,8 @@ class GameWorld {
             this.speedUp();
             this.grid.grow();
             this.points += 1;
+            this.pointElement.innerHTML = ""+this.points;
+            
         }
         // console.log("gm");
     }

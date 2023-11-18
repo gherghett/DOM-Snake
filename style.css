@@ -4,6 +4,14 @@ body, html {
     padding: 0;
 }
 
+h1 {
+    z-index: 100;
+    position: relative;
+    margin: 1em;
+    font-family: 'Courier New', Courier, monospace;
+    color: rgb(77, 126, 126);
+}
+
 #meta_grid {
     border: 1px;
     border-color: black;
