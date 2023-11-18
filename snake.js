@@ -3,6 +3,23 @@ the divsgeneration.py was used to generate the very many divs that represents th
 most of the code is in the Snake class, the gameloop is simple, the failstate is a reload of the screen
 the snake doesnt change speed as apples are eaten
 */
+const TILES_HORIZONTAL = 16;
+const TILES_VERTICAL = 16;
+
+function createDivs(){
+    let body = document.body;
+    let gridDiv = document.createElement("div");
+    gridDiv.classList.add("grid");
+    body.appendChild(gridDiv);
+    for(let i = 0; i < TILES_VERTICAL; i++){
+        for(let j = 0; j < TILES_HORIZONTAL; j++){
+            let tile = document.createElement("div");
+            tile.id = getTileId(i, j);
+            tile.classList.add("tile");
+            gridDiv.appendChild(tile);
+        }
+    }
+}
 
 //x is updown and y leftright
 function getTileId(x, y){
@@ -145,6 +162,8 @@ class GameWorld {
         this.intervalId = setInterval(() => this.gameLoop(), this.gameSpeed);
     }
 }
+
+createDivs();
 
 const gameWorld = new GameWorld();
 
