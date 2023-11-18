@@ -14,45 +14,6 @@ const GROWTH_PER_APPLE = 3;
 const START_SPEED = 150; //ms per frame, so lower value is higher speed
 const SPEED_ACC = 0.95;
 
-function getRotationDegrees(elem) {
-    const st = window.getComputedStyle(elem, null);
-    const tr = st.getPropertyValue("transform") || "fail";
-
-    // If the element has not been transformed, return 0
-    if (tr === "none" || tr === "fail") {
-        return 0;
-    }
-
-    // The matrix values
-    const values = tr.split('(')[1].split(')')[0].split(',');
-    const a = values[0];
-    const b = values[1];
-
-    // Calculating the angle in radians and then converting to degrees
-    const angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
-
-    return angle;
-}
-
-function createSpinLeftAnimation(elem, duration = '20s') {
-    const currentDegrees = getRotationDegrees(elem);
-
-    // Create a new style element
-    let styleElem = document.createElement('style');
-    document.head.appendChild(styleElem);
-
-    // Create a new keyframes rule starting from the current rotation
-    const keyframes = `@keyframes dynamic-spin-left {
-        from { transform: rotate(${currentDegrees}deg); }
-        to { transform: rotate(${currentDegrees - 360}deg); }
-    }`;
-
-    styleElem.innerHTML = keyframes;
-
-    // Apply the new animation to the element
-    elem.style.animation = `dynamic-spin-left ${duration} linear infinite`;
-}
-
 //x is updown and y leftright
 function getTileClass(x, y){
     return "tile_" + x.toString().padStart(2, '0') + y.toString().padStart(2, '0');
@@ -69,6 +30,12 @@ class Grid {
         this.width = 1;
         this.posX = 0;
         this.posY = 0;
+        this.rotation = 0;
+        this.rotate = false;
+        this.rotationSpeed = 1;
+        this.scale = 1;
+        this.scaleAnimate = false;
+        this.scaleDir = 0.01;
 
         this.window_height = window.innerHeight;
         this.window_width = window.innerWidth;
@@ -77,9 +44,10 @@ class Grid {
         console.log("maxRows: "+this.maxRows +"maxColumns: "+this.maxColumns)
 
         this.moveState = 0;
-        this.moveUp = false;
-        this.moveLeft = false;
+        this.moveX = false;
+        this.moveY = false;
         this.moveInterval = null;
+        this.animateMoveSpeed = 1;
 
         this.body = document.body;
         this.metaGrid = document.createElement("div");
@@ -115,15 +83,15 @@ class Grid {
         }
         if(this.height < this.maxRows){
             if(this.height == this.maxRows - 1){
-                this.height = this.maxRows+1;
-                addPlayGrid(2);
+                this.height = this.maxRows+3;
+                addPlayGrid(4);
             } else {
                 this.height += 1;
                 addPlayGrid(1);
             }
         } else if(this.width < this.maxColumns){
             if(this.width == this.maxColumns - 1){
-                addWidth(2);
+                addWidth(4);
             } else {
                 addWidth(1);
             }
@@ -133,43 +101,83 @@ class Grid {
         console.log("H: "+this.height+" W: "+this.width);
     }
 
-    startMove(){
-        this.moveInterval = setInterval(()=>this.move(), 100);
-    }
-    stopMove(){
-        clearInterval(this.moveInterval);
-    }
+    // startMove(){
+    //     this.moveInterval = setInterval(()=>this.move(), 100);
+    // }
+    // stopMove(){
+    //     clearInterval(this.moveInterval);
+    // }
     changeMoveState(){
         this.moveState += 1;
-        if(this.moveInterval === null){
-            this.startMove();
+        if(this.animated === undefined){
+            this.animated = true;
+            this.animate();
         }
-        if( this.moveState > 0 ){
-            this.moveUp = true;
+        if( this.moveState == 1 ){
+            this.moveX = true;
         }
-        if( this.moveState > 1 ){
-            this.moveLeft = true;
+        if( this.moveState == 2 ){
+            this.moveY = true;
         }
-        if( this.moveState > 2 ){
-            this.metaGrid.classList.add("spinning-right");
+        if( this.moveState == 3){
+            this.animateMoveSpeed = -3;
         }
-        if( this.moveState > 3 ){
-            createSpinLeftAnimation(this.metaGrid, "10s");
+        if( this.moveState == 4){
+            this.animateMoveSpeed = 3;
+            this.rotate = true;
+            this.moveY = false;
+            this.moveX = false;
         }
+        if( this.moveState == 5 ){
+            this.scaleAnimate =true;
+        }
+        if( this.moveState == 6){
+            this.scaleDir = 0.05;
+        }
+        console.log("movestate: "+this.moveState);
     }
     move(){
-        if( this.moveUp ) {
-            this.metaGrid.style.top = ""+this.posX+"px";
-            this.posX -= 2;
-            if(this.posX < -GRID_SIZE)
-                this.posX = 0;
+        // if( this.moveUp ) {
+        //     this.metaGrid.style.top = ""+this.posX+"px";
+        //     this.posX -= 2;
+        //     if(this.posX < -GRID_SIZE)
+        //         this.posX = 0;
+        // }
+        // if( this.moveLeft ){
+        //     this.metaGrid.style.left = ""+this.posY+"px";
+        //     this.posY -= 2;
+        //     if(this.posY < -GRID_SIZE)
+        //         this.posY = 0;
+        // }
+    }
+
+    animate(){
+        if( this.moveX ) {
+            this.posX = ((this.posX - this.animateMoveSpeed) % -GRID_SIZE) -GRID_SIZE;
         }
-        if( this.moveLeft ){
-            this.metaGrid.style.left = ""+this.posY+"px";
-            this.posY -= 2;
-            if(this.posY < -GRID_SIZE)
-                this.posY = 0;
+        if( this.moveY ) {
+            this.posY = ((this.posY - this.animateMoveSpeed) % -GRID_SIZE) - GRID_SIZE;
         }
+        if( this.rotate ){
+            this.rotation = (this.rotation + this.rotationSpeed)%360;
+        }
+        if( this.scaleAnimate ){
+            if( this.scaleDir < 0 ) {
+                this.scale = this.scale * (this.scaleDir+1);
+                if( this.scale < 0.25 )
+                    this.scaleDir = -this.scaleDir;
+            } else {
+                this.scale = this.scale * (this.scaleDir+1);
+                if( this.scale > 1.5 )
+                    this.scaleDir = -this.scaleDir;
+            }
+
+        }
+        // this.metaGrid.style.top = this.posX+"px";
+        // this.metaGrid.style.left = this.posY+"px";
+        this.metaGrid.style.transform = "translate("+this.posX+"px, "+this.posY+"px) rotate("+this.rotation+"deg) scale("+this.scale+")";
+
+        requestAnimationFrame(() => this.animate());
     }
 }
 
@@ -288,6 +296,7 @@ class Apple {
 
 class GameWorld {
     constructor(){
+        this.points = 0;
         this.grid = new Grid();
         this.snake = new Snake();
         this.apple = new Apple();
@@ -301,6 +310,7 @@ class GameWorld {
         if( this.snake.collide(this.apple)){
             this.speedUp();
             this.grid.grow();
+            this.points += 1;
         }
         // console.log("gm");
     }
