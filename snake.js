@@ -23,11 +23,12 @@ function randomPos(){
     return Math.floor(Math.random()*TILES_HORIZONTAL);
 }
 
+//grid keeps tabs on the repeating grids*, and all animation
+//*a grid is the entire playarea which is duplicated, all grids are contained in the metaGrid
 class Grid {
-
     constructor(){
-        this.height = 1;
-        this.width = 1;
+        
+        //animation
         this.posX = 0;
         this.posY = 0;
         this.rotation = 0;
@@ -36,17 +37,21 @@ class Grid {
         this.scale = 1;
         this.scaleAnimate = false;
         this.scaleDir = 0.01;
-
+        
+        //the game does not take into account that the player can change the window
         this.window_height = window.innerHeight;
         this.window_width = window.innerWidth;
+        this.height = 1; //amount of rows of grids downwards
+        this.width = 1;  //amount of columns of grids
         this.maxColumns = Math.ceil(this.window_width/GRID_SIZE);
         this.maxRows = Math.ceil(this.window_height/GRID_SIZE);
-        console.log("maxRows: "+this.maxRows +"maxColumns: "+this.maxColumns)
+        //console.log("maxRows: "+this.maxRows +"maxColumns: "+this.maxColumns)
 
+        //moveState changes +1 when apples are eaten and deciede what kind of animation is applied
+        //its basically the "level"
         this.moveState = 0;
         this.moveX = false;
         this.moveY = false;
-        this.moveInterval = null;
         this.animateMoveSpeed = 1;
 
         this.body = document.body;
@@ -57,6 +62,7 @@ class Grid {
         this.createDivs();
     }
 
+    //creates the 16x16 grid which the game is played on
     createDivs(){
         this.gridDiv.id = "grid_original";
         this.gridDiv.classList.add("grid");
@@ -71,11 +77,14 @@ class Grid {
         }
     }
     
+    //a bit messy but before the moveStates starts to change the playfield "grows" by 
+    //visually multiplying the grids
     grow(){
         const addPlayGrid = (amount) => {
             for( let i = 0; i < amount; i++)
                 this.metaGrid.appendChild(this.gridDiv.cloneNode(true));
         }
+        //since the columns are added after the rows each column needs a full row of grids
         const addWidth = (columns) => {
             this.width += columns;
             this.metaGrid.style.gridTemplateColumns = "repeat("+this.width+","+GRID_SIZE+"px)";
@@ -83,10 +92,10 @@ class Grid {
         }
         if(this.height < this.maxRows){
             if(this.height == this.maxRows - 1){
-                this.height = this.maxRows+3;
+                this.height = this.maxRows+3; //the extra grids are for wrapping
                 addPlayGrid(4);
             } else {
-                let heightAdd = Math.ceil(this.maxRows/3); //so three times an we are there
+                let heightAdd = Math.ceil(this.maxRows/3); //so three times and we are there
                 this.height += heightAdd;
                 addPlayGrid(heightAdd);
             }
@@ -100,18 +109,12 @@ class Grid {
         } else if(this.width >= this.maxColumns && this.height >= this.maxRows){
             this.changeMoveState();
         }
-        console.log("H: "+this.height+" W: "+this.width);
+        //console.log("H: "+this.height+" W: "+this.width);
     }
 
-    // startMove(){
-    //     this.moveInterval = setInterval(()=>this.move(), 100);
-    // }
-    // stopMove(){
-    //     clearInterval(this.moveInterval);
-    // }
     changeMoveState(){
         this.moveState += 1;
-        if(this.animated === undefined){
+        if(this.animated === undefined){ //starts the animation
             this.animated = true;
             this.animate();
         }
@@ -127,6 +130,7 @@ class Grid {
         if( this.moveState == 4){
             this.animateMoveSpeed = 3;
             this.rotate = true;
+            //rotation at the same time as moveX or moveY does not work properly
             this.moveY = false;
             this.moveX = false;
         }
@@ -136,21 +140,7 @@ class Grid {
         if( this.moveState == 6){
             this.scaleDir = 0.05;
         }
-        console.log("movestate: "+this.moveState);
-    }
-    move(){
-        // if( this.moveUp ) {
-        //     this.metaGrid.style.top = ""+this.posX+"px";
-        //     this.posX -= 2;
-        //     if(this.posX < -GRID_SIZE)
-        //         this.posX = 0;
-        // }
-        // if( this.moveLeft ){
-        //     this.metaGrid.style.left = ""+this.posY+"px";
-        //     this.posY -= 2;
-        //     if(this.posY < -GRID_SIZE)
-        //         this.posY = 0;
-        // }
+        //console.log("movestate: "+this.moveState);
     }
 
     animate(){
@@ -184,10 +174,14 @@ class Grid {
 }
 
 class Snake {
-    x;
+    //position of snake head
+    x; 
     y;
+    //the event.key
     moveDir;
+    //array of tile coordinates
     snakeBody = [];
+    //last piece of body
     tail;
     bodyLength;
     constructor(){
@@ -199,10 +193,8 @@ class Snake {
         this.bodyLength = 5; //change to "grow the snake"
     }
 
-
     changeDir(dir){
         this.moveDir = dir;
-        //console.log("snakedir is"+this.moveDir);
     }
 
     move(){
@@ -219,13 +211,13 @@ class Snake {
         else if(moveDir === "ArrowDown")
             x++;
 
+        //wrapping
         if( y > 15 ) y = 0;
         if( x > 15 ) x = 0;
         if( y < 0 ) y = 15;
         if( x < 0 ) x = 15;
  
         let pos = [x, y];
-        //console.log(pos)
         this.snakeBody.unshift(pos);
         if(this.snakeBody.length > this.bodyLength)
             this.tail = this.snakeBody.pop();
@@ -260,8 +252,9 @@ class Snake {
 
     draw(){
         //we need to draw the head and erase the tail
+        //the tail was popped in the move() function, and coords saved in the this.tail var
         let tailEnd = document.querySelectorAll("."+getTileClass(...this.tail));
-        tailEnd.forEach(tile => tile.classList.remove('snakeBody'));
+        tailEnd.forEach(tile => tile.classList.remove('snakeBody')); //i guess theres only one
         //
         let head = document.querySelectorAll("."+getTileClass(...this.snakeBody[0]));
         head.forEach( tile => tile.classList.add('snakeBody'));
@@ -281,7 +274,6 @@ class Apple {
             this.dispose()
         this.x = randomPos();
         this.y = randomPos();
-        let ccc = 1;
         if(snake == null || snake.checkPosFree(this.x, this.y)){
             this.appleTile = document.querySelectorAll("."+getTileClass(this.x, this.y));
             this.appleTile.forEach( tile => tile.classList.add('appleTile'));
@@ -298,21 +290,20 @@ class Apple {
 
 class GameWorld {
     constructor(){
-        this.points = 0;
-        this.bestScore = localStorage.getItem("personalBestScore");
-        if( this.bestScore == undefined )
-            this.bestScore = 0;
-        else
-            this.bestScore = parseInt(this.bestScore);
         this.grid = new Grid();
         this.snake = new Snake();
         this.apple = new Apple();
-        this.gameSpeed = START_SPEED;
-        this.intervalId = setInterval(() => this.gameLoop(), this.gameSpeed);
-        this.debug = new Debug();
+
+        this.points = 0;
+        this.bestScore = localStorage.getItem("personalBestScore");
+        this.bestScore = this.bestScore == undefined ? 0 : parseInt(this.bestScore);
         this.pointElement = document.getElementById("points");
         this.bestElement = document.getElementById("best");
         this.setScore();
+
+        this.gameSpeed = START_SPEED;
+        this.intervalId = setInterval(() => this.gameLoop(), this.gameSpeed);
+        this.debug = new Debug();
     }
     gameLoop(){
         this.snake.move();
