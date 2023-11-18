@@ -14,6 +14,45 @@ const GROWTH_PER_APPLE = 3;
 const START_SPEED = 150; //ms per frame, so lower value is higher speed
 const SPEED_ACC = 0.95;
 
+function getRotationDegrees(elem) {
+    const st = window.getComputedStyle(elem, null);
+    const tr = st.getPropertyValue("transform") || "fail";
+
+    // If the element has not been transformed, return 0
+    if (tr === "none" || tr === "fail") {
+        return 0;
+    }
+
+    // The matrix values
+    const values = tr.split('(')[1].split(')')[0].split(',');
+    const a = values[0];
+    const b = values[1];
+
+    // Calculating the angle in radians and then converting to degrees
+    const angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
+
+    return angle;
+}
+
+function createSpinLeftAnimation(elem, duration = '20s') {
+    const currentDegrees = getRotationDegrees(elem);
+
+    // Create a new style element
+    let styleElem = document.createElement('style');
+    document.head.appendChild(styleElem);
+
+    // Create a new keyframes rule starting from the current rotation
+    const keyframes = `@keyframes dynamic-spin-left {
+        from { transform: rotate(${currentDegrees}deg); }
+        to { transform: rotate(${currentDegrees - 360}deg); }
+    }`;
+
+    styleElem.innerHTML = keyframes;
+
+    // Apply the new animation to the element
+    elem.style.animation = `dynamic-spin-left ${duration} linear infinite`;
+}
+
 //x is updown and y leftright
 function getTileClass(x, y){
     return "tile_" + x.toString().padStart(2, '0') + y.toString().padStart(2, '0');
@@ -113,6 +152,9 @@ class Grid {
         }
         if( this.moveState > 2 ){
             this.metaGrid.classList.add("spinning-right");
+        }
+        if( this.moveState > 3 ){
+            createSpinLeftAnimation(this.metaGrid, "10s");
         }
     }
     move(){

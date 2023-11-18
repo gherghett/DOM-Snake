@@ -36,7 +36,7 @@ body, html {
     background-color: brown;
 }
 
-@keyframes spin {
+@keyframes spin-right {
     from {
         transform: rotate(0deg);
     }
@@ -44,7 +44,19 @@ body, html {
         transform: rotate(360deg);
     }
 }
+@keyframes spin-left {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(-360deg);
+    }
+}
 
 .spinning-right {
-    animation: spin 20s linear infinite;
+    animation: spin-right 20s linear infinite;
+}
+
+.spinning-left {
+    animation: spin-left 20s linear infinite;
 }
