@@ -36,3 +36,15 @@ body, html {
     background-color: brown;
 }
 
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spinning-right {
+    animation: spin 20s linear infinite;
+}

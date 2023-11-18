@@ -111,6 +111,9 @@ class Grid {
         if( this.moveState > 1 ){
             this.moveLeft = true;
         }
+        if( this.moveState > 2 ){
+            this.metaGrid.classList.add("spinning-right");
+        }
     }
     move(){
         if( this.moveUp ) {
