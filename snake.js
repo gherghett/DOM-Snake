@@ -1,17 +1,23 @@
+/*Simple snake game entirely in javascript (and html)
+the divsgeneration.py was used to generate the very many divs that represents the tiles, 
+most of the code is in the Snake class, the gameloop is simple, the failstate is a reload of the screen
+the snake doesnt change speed as apples are eaten
+*/
 
+//x is updown and y leftright
 function getTileId(x, y){
     return x.toString().padStart(2, '0') + y.toString().padStart(2, '0');
 }
 
 function randomPos(){
-    return Math.floor(Math.random()*16);
+    return Math.floor(Math.random()*16);//the number of tiles is hardcoded
 }
 
 class Snake {
     x;
     y;
     moveDir;
-    snakeBody = []
+    snakeBody = [];
     tail;
     bodyLength;
     constructor(){
@@ -20,12 +26,13 @@ class Snake {
         this.moveDir = "ArrowRight";
         this.snakeBody.push([this.x, this.y]);
         this.tail = [this.x, this.y];
-        this.bodyLength = 5;
+        this.bodyLength = 5; //change to "grow the snake"
     }
+
 
     changeDir(dir){
         this.moveDir = dir;
-        console.log("snakedir is"+this.moveDir);
+        //console.log("snakedir is"+this.moveDir);
     }
 
     move(){
@@ -69,23 +76,22 @@ class Snake {
     }
 
     checkPosFree(x, y){
+        let collision = true;
         this.snakeBody.forEach(element => {
             if(element[0] === x && element[1] === y)
-                return false;
+                collision = false;
         });
-        return true;
+        return collision;
     }
 
 
     draw(){
-        console.log(this.snakeBody[0]);
+        // console.log("tail"+this.tail)
+        let tailEnd = document.getElementById(getTileId(...this.tail));
+        tailEnd.classList.remove('snakeBody');
         //we need to draw the head and erase the tail
         let head = document.getElementById(getTileId(...this.snakeBody[0]));
         head.classList.add('snakeBody');
-
-       // console.log("tail"+this.tail)
-        let tailEnd = document.getElementById(getTileId(...this.tail));
-        tailEnd.classList.remove('snakeBody');
     }
 }
 
@@ -130,7 +136,7 @@ function gameLoop(){
     theSnake.move();
     theSnake.draw();
     theSnake.collide(theApple);
-    console.log("gameloop");
+
 }
 
-let intervalId = setInterval(gameLoop, 500);
+let intervalId = setInterval(gameLoop, 150);
